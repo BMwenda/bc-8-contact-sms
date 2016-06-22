@@ -3,10 +3,10 @@ This interactive command application utility uses docopt with the
 built in cmd module for contact management and sending SMSs.
 
 Usage:
-    contacts_manage add -n <name> -p <phonenumber>
+    contacts_manage add -p <phonenumber> -n <name>...
     contacts_manage search <name>
-	contacts_manage text <name> -m <>
-	contacts_manage sync -c
+    contacts_manage text <name> -m <messagebody>...
+    contacts_manage sync -c
     contacts_manage (-i | --interactive)
     contacts_manage (-h | --help | --version)
 Options:
@@ -18,9 +18,12 @@ Options:
  
 import sys
 sys.path.append('C:\Users/ALEX/Documents/GitHub/bc-8-contact-sms/contact-sms-env/Lib/site-packages')
+from sys import argv
 import cmd
 from docopt import docopt, DocoptExit
-
+from contacts_crud import ContactsCrud
+from messages_crud import MessagesCrud
+from send_sms import SendSms
 
 def docopt_cmd(func):
     """
@@ -58,41 +61,91 @@ class ContactsManage (cmd.Cmd):
         + ' (type help for a list of commands.)'
     prompt = '(contacts_manage) '
     file = None
-	
+    
     @docopt_cmd
     def do_add(self, arg):
-        """Usage: add -n <name> -p <phonenumber>"""
+        """Usage: add -p <phonenumber> -n <name>..."""
         """Ask Wangari for example on splitting <name>"""
 
-        print(arg)
-        print(arg['-n'])
-        print(arg['-p'])
-        print(arg['<name>'])
-        print(arg['<phonenumber>'])
+        #print(arg)
+        #print(arg['-n'])
+        #print(arg['-p'])
+        #print(arg['<name>'])
+        #print(arg['<phonenumber>'])
+        id = 0
+        is_sync = 0
+        user_id = 1
+        contact_new = ContactsCrud()
+        if contact_new.create_contact(arg['<name>'][0], arg['<name>'][1], arg['<phonenumber>'], is_sync, user_id) == True:
+            print(arg['<name>'][0] + " has been saved.")
+        else:
+            print("Contact " + arg['<name>'][0] + " failed to save.")
+        
 
     @docopt_cmd
     def do_search(self, arg):
         """Usage: search <name>"""
 
-        print(arg)
-        print(arg['<name>'])
+        #print(arg)
+        #print(arg['<name>'])
+        contacts_find = ContactsCrud()
+        search_result = contacts_find.find_contact_by_name((arg['<name>']).title())
+        if len(search_result) == 0:
+            print((arg['<name>']).title() + " does not exist.")
+        elif len(search_result) == 1:
+            print("Name: " + search_result[0].first_name + " Phone number: " + search_result[0].phone_number)
+        else:
+            str_response = "Which " + (arg['<name>']).title() + "? \n"
+            count = 0
+            for contact in search_result:
+                count += 1
+                str_response += "[" + str(count) + "] " + contact.first_name + " "
+            else:
+                str_response += "i.e " + search_result[0].first_name + " " + search_result[0].last_name + ", " + search_result[1].first_name + " " + search_result[1].last_name + " etc"
+            print(str_response)
+            
+            
+    @docopt_cmd
+    def do_text(self, arg):
+        """Usage: text <name> -m <messagebody>..."""
+        
+        #print(arg)
+        #print(arg['<name>'])
+        #print(arg['-m'])
+        #print(arg['<messagebody>'])
 
-	@docopt_cmd
-	def do_text(self, arg):
-		"""Usage: text <name> -m <messagebody>"""
-		
-		print(arg)
-        print(arg['<name>'])
-        print(arg['-m'])
-        print(arg['<messagebody>'])
-	
-	@docopt_cmd
-	def do_sync(self, arg):
-		"""Usage: sync -c"""
-		
-		print(arg)
-        print(arg['-c'])
-	
+        #Get name
+        #Use name to obtain number
+        #Invoke SendSms to send text
+        #Save message body to database
+
+        sms_new = SendSms()
+        contacts_find = ContactsCrud()
+        search_result = contacts_find.find_contact_by_keyword((arg['<name>']).title())
+        if len(search_result) == 0:
+            print((arg['<name>']).title() + " does not exist.")
+        elif len(search_result) == 1:
+            sms_new.send_sms(search_result[0].phone_number, " ".join(arg['<messagebody>']))
+        else:
+            prompt = 'Recipient Chooser> '
+            str_response = "There exists multiple individuals, \nwith the name " + (arg['<name>']).title()
+            str_response += "\nPlease provide the desired recipient. \n"
+            count = 0
+            for contact in search_result:
+                count += 1
+                str_response += "[" + str(count) + "] " + contact.first_name + " " + contact.last_name + "\n"
+            print(str_response)
+            destination = raw_input(prompt)
+            single_result = contacts_find.find_contact_by_name(str(destination).split())
+            sms_new.send_sms(single_result[0].phone_number, " ".join(arg['<messagebody>']))
+    
+    @docopt_cmd
+    def do_sync(self, arg):
+        """Usage: sync -c"""
+        
+        #print(arg)
+        #print(arg['-c'])
+    
     def do_quit(self, arg):
         """Quits out of Interactive Mode."""
 
