@@ -1,5 +1,6 @@
+import os
 import sys
-sys.path.append('C:/Users/ALEX/Documents/GitHub/bc-8-contact-sms/contact-sms-env/Lib/site-packages')
+sys.path.append(os.path.join(os.path.dirname(__file__), 'contact-sms-env\Lib\site-packages'))
 import hashlib
 from sqlalchemy import create_engine, and_, or_
 from sqlalchemy.orm import sessionmaker
@@ -15,11 +16,11 @@ class UsersCrud(object):
     def __init__(self):
         pass
     
-    def create_user(self, first_name, last_name, username, password):
+    def create_user(self, first_name, last_name, phone_number, username, password):
         #Create a user
         hash_object = hashlib.md5(password.encode())
         password = hash_object.hexdigest()
-        new_user = User(first_name, last_name, username, password)
+        new_user = User(first_name, last_name, phone_number, username, password)
         # Add the record to the session object
         UsersCrud.session.add(new_user)
         # commit the record the database

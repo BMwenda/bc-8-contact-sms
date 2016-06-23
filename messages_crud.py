@@ -1,5 +1,6 @@
+import os
 import sys
-sys.path.append('C:\Users/ALEX/Documents/GitHub/bc-8-contact-sms/contact-sms-env/Lib/site-packages')
+sys.path.append(os.path.join(os.path.dirname(__file__), 'contact-sms-env\Lib\site-packages'))
 from sqlalchemy import create_engine, or_
 from sqlalchemy.orm import sessionmaker
 from database import Message

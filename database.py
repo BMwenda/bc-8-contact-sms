@@ -1,5 +1,6 @@
+import os
 import sys
-sys.path.append('C:\Users/ALEX/Documents/GitHub/bc-8-contact-sms/contact-sms-env/Lib/site-packages')
+sys.path.append(os.path.join(os.path.dirname(__file__), 'contact-sms-env\Lib\site-packages'))
 from sqlalchemy import create_engine, ForeignKey, func
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
@@ -19,21 +20,23 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     first_name = Column(String)
     last_name = Column(String)
+    phone_number = Column(String)
     username = Column(String)
     password = Column(String)
     date_created = Column(DateTime, default=func.now())
     
-    def __init__(self, first_name, last_name, username, password):
+    def __init__(self, first_name, last_name, phone_number, username, password):
         self.first_name = first_name.upper()
         self.last_name = last_name.upper()
+        self.phone_number = phone_number
         self.username = username
         self.password = password
         self.date_created = None
        
     def __repr__(self):
-        return "<Message('%s', '%s', '%s')>" % (self.first_name, self.last_name, self.username)
+        return "<Message('%s', '%s', '%s', '%s')>" % (self.first_name, self.last_name, self.username, self.phone_number)
  
-        
+       
 class Contact(Base):
     __tablename__ = 'contacts'
     id = Column(Integer, primary_key=True)
@@ -79,7 +82,6 @@ class Message(Base):
     
     def __repr__(self):
         return "<Message('%s', '%i', '%s', '%s', '%i')>" % (self.source, self.recipient, self.message_body, self.date_sent, self.user_id)
-    
 
 # create tables
 Base.metadata.create_all(engine)
