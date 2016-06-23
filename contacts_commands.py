@@ -19,11 +19,14 @@ Options:
 import sys
 sys.path.append('C:\Users/ALEX/Documents/GitHub/bc-8-contact-sms/contact-sms-env/Lib/site-packages')
 from sys import argv
+import getpass
 import cmd
 from docopt import docopt, DocoptExit
+from users_crud import UsersCrud
 from contacts_crud import ContactsCrud
 from messages_crud import MessagesCrud
 from send_sms import SendSms
+from contacts_sync import ContactsSync
 
 def docopt_cmd(func):
     """
@@ -57,15 +60,45 @@ def docopt_cmd(func):
 
 
 class ContactsManage (cmd.Cmd):
-    intro = 'Welcome to my interactive program!' \
-        + ' (type help for a list of commands.)'
+    intro = 'Tangamana \n'\
+    + ''\
+    + ' (type help for a list of commands.)'
+
+    global user_id
+    global user_name
+    user_exists = False
+    trials = 3
+
+    while user_exists != True:
+        username = raw_input("Username: ")
+        password = getpass.getpass("Password: ")
+        user_find = UsersCrud()
+        if len(username) > 0 and len(password) > 0:
+            user_present = user_find.find_user_by_username_password(username, password)
+            if user_present != None:
+                user_id = user_present.id
+                user_name = user_present.first_name.title() + " " + user_present.last_name.title()
+                user_exists = True
+            else:
+                trials -= 1
+                print "Please input a valid username and password."
+                print trials, " more attempts."
+        else:
+            print "Please input a valid username and password."
+            continue
+        
+        if trials == 0:
+            print "You have run out of attempts. \nThank you. Good Bye!"
+            exit()
+        else:
+            continue
+
     prompt = '(contacts_manage) '
     file = None
     
     @docopt_cmd
     def do_add(self, arg):
         """Usage: add -p <phonenumber> -n <name>..."""
-        """Ask Wangari for example on splitting <name>"""
 
         #print(arg)
         #print(arg['-n'])
@@ -74,7 +107,6 @@ class ContactsManage (cmd.Cmd):
         #print(arg['<phonenumber>'])
         id = 0
         is_sync = 0
-        user_id = 1
         contact_new = ContactsCrud()
         if contact_new.create_contact(arg['<name>'][0], arg['<name>'][1], arg['<phonenumber>'], is_sync, user_id) == True:
             print(arg['<name>'][0] + " has been saved.")
@@ -89,11 +121,11 @@ class ContactsManage (cmd.Cmd):
         #print(arg)
         #print(arg['<name>'])
         contacts_find = ContactsCrud()
-        search_result = contacts_find.find_contact_by_name((arg['<name>']).title())
+        search_result = contacts_find.find_contact_by_keyword((arg['<name>']).title())
         if len(search_result) == 0:
             print((arg['<name>']).title() + " does not exist.")
         elif len(search_result) == 1:
-            print("Name: " + search_result[0].first_name + " Phone number: " + search_result[0].phone_number)
+            print("Name: " + search_result[0].first_name + " " + search_result[0].last_name + " Phone number: " + search_result[0].phone_number)
         else:
             str_response = "Which " + (arg['<name>']).title() + "? \n"
             count = 0
@@ -125,9 +157,9 @@ class ContactsManage (cmd.Cmd):
         if len(search_result) == 0:
             print((arg['<name>']).title() + " does not exist.")
         elif len(search_result) == 1:
-            sms_new.send_sms(search_result[0].phone_number, " ".join(arg['<messagebody>']))
+            sms_new.send_sms(search_result[0].phone_number, " ".join(arg['<messagebody>']), user_name)
         else:
-            prompt = 'Recipient Chooser> '
+            prompt = 'Recipient Selection> '
             str_response = "There exists multiple individuals, \nwith the name " + (arg['<name>']).title()
             str_response += "\nPlease provide the desired recipient. \n"
             count = 0
@@ -137,7 +169,7 @@ class ContactsManage (cmd.Cmd):
             print(str_response)
             destination = raw_input(prompt)
             single_result = contacts_find.find_contact_by_name(str(destination).split())
-            sms_new.send_sms(single_result[0].phone_number, " ".join(arg['<messagebody>']))
+            sms_new.send_sms(single_result[0].phone_number, " ".join(arg['<messagebody>']), str(user_name))
     
     @docopt_cmd
     def do_sync(self, arg):
@@ -145,6 +177,16 @@ class ContactsManage (cmd.Cmd):
         
         #print(arg)
         #print(arg['-c'])
+
+        #Get list of contacts
+        #Pass list of contacts to firebase handler class
+
+        contacts_list = ContactsCrud()
+        contacts_sync = ContactsSync()
+        contacts_to_push = contacts_list.find_contact_to_sync()
+        contacts_sync_result = contacts_sync.contacts_push(contacts_to_push)
+        contacts_list.update_contact_post_sync(contacts_to_push)
+        print(contacts_sync_result)
     
     def do_quit(self, arg):
         """Quits out of Interactive Mode."""

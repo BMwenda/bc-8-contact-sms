@@ -11,11 +11,7 @@ class MessagesCrud(object):
     Session = sessionmaker(bind=engine)
     session = Session()
     
-    
     def __init__(self):
-        #Use pass since NameError: name 'first_name' is not defined error
-        #when you pass values in the function and 
-        #use self.property = property_value in init
         pass
     
     def create_message(self, source, recipient_id, message_body, user_id):

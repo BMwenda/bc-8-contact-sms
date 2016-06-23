@@ -3,11 +3,10 @@ from AfricasTalkingGateway import AfricasTalkingGateway, AfricasTalkingGatewayEx
 
 class SendSms(object):
     
-    
     def __init__(self):
         pass
 
-    def send_sms(self, recipient, message_body):
+    def send_sms(self, recipient, message_body, username):
         #Login credentials for the API
         username = "alexmagana"
         apikey = "7854c8cccb76f963613888d2584f60bd265607bd8d2d1c3cb7a0c1e8ddd50aa1"
@@ -16,7 +15,7 @@ class SendSms(object):
         to = recipient#"+254729071228,+254702212525"
         
         #The content of the message to send to be sent
-        message = message_body#"This is a test, I hope you've been able to locate an M-Pesa agent."
+        message = message_body + " " + username#"This is a test, I hope you've been able to locate an M-Pesa agent."
         
         #Create an instance of the AfricasTalkingGateway class
         gateway = AfricasTalkingGateway(username, apikey)

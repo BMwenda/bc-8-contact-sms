@@ -1,17 +1,24 @@
 import sys
 sys.path.append('C:/Users/ALEX/Documents/GitHub/bc-8-contact-sms/contact-sms-env/Lib/site-packages')
 from pyfirebase import Firebase
-#import json
-#import pdb; pdb.set_trace()
 
-firebase = Firebase('https://contacts-7a958.firebaseio.com/')
+class ContactsSync(object):
+    firebase = Firebase('https://contacts-7a958.firebaseio.com/')
+    ref = firebase.ref('contacts')
 
-ref = firebase.ref('contacts')
+    def __init__(self):
+        pass
 
-contacts = ref.get()
+    def contacts_get(self):
+        contacts = ContactsSync.ref.get()
+        root = ContactsSync.firebase.ref()
+        return contacts
 
-payload = {"id": "2", "first_name": "James", "last_name": "Andela", "phone_number": "+254729011229","is_sync": "0", "date_created": "2016-06-22 06:00:25", "user_id": "1"}
+    def contacts_push(self, list_contacts):
+        #list_contacts is a collection of dictionaries
+        for contact in list_contacts:
+            payload = contact
+            contacts = ContactsSync.ref.push(payload)
 
-contacts = ref.push(payload)
-
-root = firebase.ref()
+        root = ContactsSync.firebase.ref()
+        return contacts
