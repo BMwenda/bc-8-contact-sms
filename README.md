@@ -55,5 +55,5 @@
 4. Install required modules
 	* Open the requirements.txt file and pip install the required modules using `pip install -r requirements.txt`
 
-5. Run ThoughtBook app
+5. Run Contacts Manager & SMS app
 	* On your console type in `python contacts_commands.py -i` to run the app interactively
