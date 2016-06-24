@@ -38,9 +38,12 @@
 		* If you have Python installed, you should see a response that includes the version number.
 
 2. Clone the repository to your local folder of your choice
+ 	* On GitHub navigate the main page of the repository.
+		https://github.com/gatobualex/bc-8-contact-sms - automatic!
+	* Under the repository name, click on the URL and copy it
 	* Open Git Bash
 	* Change the working directory on cmd to the location where you want your clone made
-	* Type 'git clone ' and paste the URL [Repo Location](https://github.com/gatobualex/bc-8-contact-sms.git)
+	* Type 'git clone ' and paste the URL
 	*Press **Enter** to finish creating your cloned repository
 
 
