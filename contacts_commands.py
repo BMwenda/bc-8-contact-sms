@@ -81,6 +81,7 @@ def introduction():
     print('     contacts_manage search <name>')
     print('     contacts_manage text <name> -m <messagebody>...')
     print('     contacts_manage sync -c')
+    print('     contacts_manage retrieve -c')
     print('     contacts_manage (-i | --interactive)')
     print('     contacts_manage (-h | --help | --version)')
     print('\n')
@@ -206,11 +207,13 @@ class ContactsManage (cmd.Cmd):
 
         sms_new = SendSms()
         contacts_find = ContactsCrud()
+        sms_store = MessagesCrud()
         search_result = contacts_find.find_contact_by_keyword((arg['<name>']).title())
         if len(search_result) == 0:
             print((arg['<name>']).title() + " does not exist.")
         elif len(search_result) == 1:
             sms_new.send_sms(search_result[0].phone_number, " ".join(arg['<messagebody>']), user_name)
+            sms_store.create_message(user_name, search_result[0].id, " ".join(arg['<messagebody>']), user_id)
         else:
             prompt = 'Recipient Selection> '
             str_response = "There exists multiple individuals, \nwith the name " + (arg['<name>']).title()
@@ -223,6 +226,7 @@ class ContactsManage (cmd.Cmd):
             destination = raw_input(prompt)
             single_result = contacts_find.find_contact_by_name(str(destination).split())
             sms_new.send_sms(single_result[0].phone_number, " ".join(arg['<messagebody>']), str(user_name))
+            sms_store.create_message(user_name, search_result[0].id, " ".join(arg['<messagebody>']), user_id)
     
     @docopt_cmd
     def do_sync(self, arg):
@@ -233,6 +237,7 @@ class ContactsManage (cmd.Cmd):
 
         #Get list of contacts
         #Pass list of contacts to firebase handler class
+        print("Please wait while your contacts are saved to Firebase.")
 
         contacts_list = ContactsCrud()
         contacts_sync = ContactsSync()
@@ -240,13 +245,22 @@ class ContactsManage (cmd.Cmd):
         contacts_sync_push = contacts_sync.contacts_push(contacts_to_push, user_name, user_phone_number)
         contacts_list.update_contact_post_sync(contacts_to_push)
         print(contacts_sync_push)
+        print("Saving completed.")
     
     def do_retrieve(self, arg):
-        """Usage: retrieve -c """
+        """Usage: retrieve -c"""
 
+
+        print("Please wait while your contacts are retrieved.")
+        contact_new = ContactsCrud()
         contacts_sync = ContactsSync()
         contacts_sync_get = contacts_sync.contacts_get(user_name, user_phone_number)
-        print(contacts_sync_get)
+        #Save contacts from Firebase to Local db
+        count_contact = 0
+        for entry, content in contacts_sync_get.items():
+            contact_new.create_contact(content['first_name'], content['last_name'], content['phone_number'], content['is_sync'], content['user_id'])
+            count_contact += 1
+        print("Retrieval completed for ", count_contact , " contacts")
 
     def do_quit(self, arg):
         """Quits out of Interactive Mode."""
