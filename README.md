@@ -1,5 +1,7 @@
 # bc-8-contact-sms
 
+## CONTACT MANAGER AND SMS SERVICE 
+
 ## Introduction
 
     * A utility that allows you to:
