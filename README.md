@@ -41,7 +41,7 @@
 
 2. Clone the repository to your local folder of your choice
  	* On GitHub navigate the main page of the repository.
-		https://github.com/gatobualex/bc-8-contact-sms - automatic!
+		[Here](https://github.com/gatobualex/bc-8-contact-sms) - automatic!
 	* Under the repository name, click on the URL and copy it
 	* Open Git Bash
 	* Change the working directory on cmd to the location where you want your clone made
